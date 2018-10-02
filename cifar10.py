@@ -7,7 +7,7 @@ from tensorflow.keras.callbacks import (
 )
 
 import numpy as np
-from models import modelset
+from models import modelset_v2
 
 lr_reducer = ReduceLROnPlateau(
     factor=np.sqrt(0.1),
@@ -40,10 +40,8 @@ x_test -= mean_image
 x_train /= 128.
 x_test /= 128.
 
-model = modelset.ResNet_API.build_res_18(
-    (img_channels, img_cols, img_rows),
-    nb_classes
-)
+resnet = modelset_v2.ResNet_API()
+model = resnet.build(x_train.shape[1:])
 model.compile(
     loss='categorical_crossentropy',
     optimizer='adam',
@@ -55,8 +53,8 @@ if not data_augmentation:
         x_train,
         Y_train,
         batch_size=batch_size,
-        nb_epoch=nb_epoch,
+        epochs=nb_epoch,
         validation_data=(x_test, Y_test),
         shuffle=True,
-        callabacks=[lr_reducer, early_stopper, csv_logger]
+        # callabacks=[lr_reducer, early_stopper, csv_logger]
     )

@@ -1,5 +1,5 @@
-from tensorflow.keras import backend as K
-from tensorflow.keras.layers import (
+from keras import backend as K
+from keras.layers import (
     Input,
     Dense,
     Conv2D,
@@ -9,8 +9,8 @@ from tensorflow.keras.layers import (
     LeakyReLU,
 )
 # from tensorflow.keras.layers import Dropout
-from tensorflow.keras.models import Model
-from tensorflow.keras.regularizers import l2
+from keras.models import Model
+from keras.regularizers import l2
 
 def ResNetConv2D(*args, **kwargs):
     conv_kwargs = {
@@ -24,13 +24,10 @@ def ResNetConv2D(*args, **kwargs):
 
 def bn_relu_conv(*args, **kwargs):
     def f(x):
-        x = BatchNormalization(axis=1)(x)
+        x = BatchNormalization(axis=-1)(x)
         x = LeakyReLU(alpha=0.1)(x)
         return ResNetConv2D(*args, **kwargs)
     return f
-
-
-
 
 def shortcut(dx, x):
     x_shape = K.int_shape(x)
@@ -74,6 +71,7 @@ def resdiual_blocks(block_func, filters, repetitions):
             x = block_func(filters=filters, first_strides=first_strides)(x)
         return x
     return f
+
 
 class ResNet_API():
     @staticmethod
