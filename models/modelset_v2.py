@@ -25,7 +25,7 @@ class ResNet_API:
         x = GlobalAveragePooling2D()(x)
         x = Dense(units=10, kernel_initializer='he_normal')(x)
         prediction = Activation('softmax')(x)
-        return keras.Model(input=inputs, output=prediction)
+        return keras.Model(inputs=inputs, outputs=prediction)
 
 
     def _res_block(self, x, filters, strides=1):
