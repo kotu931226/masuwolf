@@ -7,7 +7,8 @@ from tensorflow.keras.callbacks import (
 )
 
 import numpy as np
-from models import modelset_v2
+from sklearn.model_selection import train_test_split
+from models import modelset_v3
 
 lr_reducer = ReduceLROnPlateau(
     factor=np.sqrt(0.1),
@@ -16,46 +17,38 @@ lr_reducer = ReduceLROnPlateau(
     min_lr=0.5e-6,
     min_delta=0.1
 )
-early_stopper = EarlyStopping(min_delta=0.001, patience=10)
-csv_logger = CSVLogger('resnet18_cifar10.csv')
+# early_stopper = EarlyStopping(min_delta=0.001, patience=10)
+# csv_logger = CSVLogger('resnet18_cifar10.csv')
 
 batch_size = 32
-nb_classes = 10
 nb_epoch = 200
-data_augmentation = False
 
-img_rows, img_cols = 32, 32
-img_channels = 3
+x = np.load('onehot_x.npy')
+y = np.load('onehot_y.npy')
 
-(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=1)
 
-Y_train = to_categorical(y_train, nb_classes)
-Y_test = to_categorical(y_test, nb_classes)
+x_train = x_train.astype('float32').reshape(x_train.shape+(1,))
+x_test = x_test.astype('float32').reshape(x_test.shape+(1,))
 
-x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
+print(x_train.shape[1:])
 
-mean_image = np.mean(x_train, axis=0)
-x_train -= mean_image
-x_test -= mean_image
-x_train /= 128.
-x_test /= 128.
-
-resnet = modelset_v2.ResNet_API()
+resnet = modelset_v3.ResNet_API()
 model = resnet.build(x_train.shape[1:])
+
+model.summary()
 model.compile(
     loss='categorical_crossentropy',
     optimizer='adam',
     metrics=['accuracy']
 )
 
-if not data_augmentation:
-    model.fit(
-        x_train,
-        Y_train,
-        batch_size=batch_size,
-        epochs=nb_epoch,
-        validation_data=(x_test, Y_test),
-        shuffle=True,
-        # callabacks=[lr_reducer, early_stopper, csv_logger]
-    )
+model.fit(
+    x_train,
+    y_train,
+    batch_size=batch_size,
+    epochs=nb_epoch,
+    validation_data=(x_test, y_test),
+    shuffle=True,
+    # callabacks=[lr_reducer, early_stopper, csv_logger]
+)
