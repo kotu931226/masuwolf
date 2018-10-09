@@ -1,27 +1,27 @@
-from tensorflow.keras.datasets import cifar10
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.callbacks import (
-    ReduceLROnPlateau,
-    CSVLogger,
-    EarlyStopping
-)
+# from tensorflow.keras.datasets import cifar10
+# from tensorflow.keras.utils import to_categorical
+# from tensorflow.keras.callbacks import (
+#     ReduceLROnPlateau,
+#     CSVLogger,
+#     EarlyStopping
+# )
 
 import numpy as np
 from sklearn.model_selection import train_test_split
 from models import modelset_v3
 
-lr_reducer = ReduceLROnPlateau(
-    factor=np.sqrt(0.1),
-    cooldown=0,
-    patience=3,
-    min_lr=0.5e-6,
-    min_delta=0.1
-)
+# lr_reducer = ReduceLROnPlateau(
+#     factor=np.sqrt(0.1),
+#     cooldown=0,
+#     patience=3,
+#     min_lr=0.5e-6,
+#     min_delta=0.1
+# )
 # early_stopper = EarlyStopping(min_delta=0.001, patience=10)
 # csv_logger = CSVLogger('resnet18_cifar10.csv')
 
 batch_size = 32
-nb_epoch = 200
+nb_epoch = 50
 
 x = np.load('onehot_x.npy')
 y = np.load('onehot_y.npy')
@@ -52,3 +52,5 @@ model.fit(
     shuffle=True,
     # callabacks=[lr_reducer, early_stopper, csv_logger]
 )
+
+# model.save("analogy_wolflog_20181008.h5")
