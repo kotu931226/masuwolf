@@ -23,8 +23,8 @@ from models import modelset_v3
 batch_size = 32
 nb_epoch = 50
 
-x = np.load('onehot_x.npy')
-y = np.load('onehot_y.npy')
+x = np.load('onehot_x_112.npy')
+y = np.load('onehot_y_112.npy')
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=1)
 

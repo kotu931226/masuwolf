@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# myDeta
+onehot_x_112.npy
+onehot_y_112.npy
