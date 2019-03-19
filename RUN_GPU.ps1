@@ -1,20 +1,23 @@
 $INPUT_DATA_NAME = "src_wolf_320_pad.csv"
 $LABEL_DATA_NAME = "tgt_wolf.csv"
-$EPOCHS = 5
+$EPOCHS = 25
 # $INPUT_DATA_NAME = $null
 # $LABEL_DATA_NAME = $null
 # $EPOCHS = 200
 
+# set BUCKET_NAME
 if ($global:BUCKET_NAME -eq $null){ $global:BUCKET_NAME = Read-Host("input BUCKET_NAME") }
 else {
     $DIR = Read-Host("BUCKET_NAME is " + $global:BUCKET_NAME + "? [Y/n]")
     if ($DIR -eq "n"){ $global:BUCKET_NAME = Read-Host("input BUCKET_NAME") }
 }
+# set REGION
 if ($global:REGION -eq $null){ $global:REGION = Read-Host("input REGION") }
 else {
     $DIR = Read-Host("REGION is " + $global:REGION + "? [Y/n]")
     if ($DIR -eq "n"){ $global:REGION = Read-Host("input REGION") }
 }
+# set INPUT_DATA_NAME
 if (($global:INPUT_DATA_NAME -eq $null) -And ($INPUT_DATA_NAME -eq $null)){
     $global:INPUT_DATA_NAME = Read-Host("input INPUT_DATA_NAME")
 }
@@ -25,6 +28,7 @@ else {
     $DIR = Read-Host("INPUT_DATA_NAME is " + $global:INPUT_DATA_NAME + "? [Y/n]")
     if ($DIR -eq "n") { $global:INPUT_DATA_NAME = Read-Host("input INPUT_DATA_NAME") }
 }
+# set LABEL_DATA_NAME
 if (($global:LABEL_DATA_NAME -eq $null) -And ($LABEL_DATA_NAME -eq $null)){
     $global:LABEL_DATA_NAME = Read-Host("input LABEL_DATA_NAME")
 }
