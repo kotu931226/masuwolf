@@ -45,8 +45,8 @@ $INPUT_DATA = $BUCKET_PATH + "/data/" + $global:INPUT_DATA_NAME
 $LABEL_DATA = $BUCKET_PATH + "/data/" + $global:LABEL_DATA_NAME
 $NOW_TIME = Get-Date -UFormat "%Y_%m_%d_%H_%M"
 $JOB_NAME = "training_" + $NOW_TIME
-$OUTPUT_PATH = $BUCKET_PATH + "/" + $JOB_NAME
-$ARCHIVE_PATH = $BUCKET_PATH + "/training_2000_00_00_00_00/classify.pt"
+$ARCHIVE_PATH = $BUCKET_PATH + "/" + $JOB_NAME
+$INPUT_PATH = $BUCKET_PATH + "/training_2000_00_00_00_00/classify.pt"
 
 gcloud ml-engine jobs submit training $JOB_NAME `
 --runtime-version 1.10 --python-version 3.5 `
