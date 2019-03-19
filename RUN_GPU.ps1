@@ -46,13 +46,13 @@ $LABEL_DATA = $BUCKET_PATH + "/data/" + $global:LABEL_DATA_NAME
 $NOW_TIME = Get-Date -UFormat "%Y_%m_%d_%H_%M"
 $JOB_NAME = "training_" + $NOW_TIME
 $OUTPUT_PATH = $BUCKET_PATH + "/" + $JOB_NAME
-$INPUT_MODEL_PATH = $BUCKET_PATH + "/training_2000_00_00_00_00/classify.pt"
+$ARCHIVE_PATH = $BUCKET_PATH + "/training_2000_00_00_00_00/classify.pt"
 
 gcloud ml-engine jobs submit training $JOB_NAME `
 --runtime-version 1.10 --python-version 3.5 `
 --module-name trainer.task --package-path trainer/ `
---region $REGION --job-dir $OUTPUT_PATH --config config.yaml `
+--region $REGION --job-dir $ARCHIVE_PATH --config config.yaml `
 -- `
 --input-data $INPUT_DATA --label-data $LABEL_DATA `
---output-model $OUTPUT_PATH --epochs $EPOCHS `
+--archive-path $ARCHIVE_PATH --epochs $EPOCHS `
 # --input-model $INPUT_MODEL_PATH
