@@ -19,6 +19,8 @@ batch_size = ModelParams.batch_size
 label_data_path = './data/tgt_wolf.csv'
 input_data_path = './data/src_wolf_320_pad.csv'
 save_model_path = './data/training_2000_00_00_00_00_classify.pt'
+# This number bigin 0
+seeing_layer = 1
 
 Threshold_enlarge = 1e-4
 
@@ -46,7 +48,6 @@ def creat_img(x):
 def creat_img2(plus, minus):
     N = plus.size(0)
     M = plus.size(1)
-    # idx = [i for i in range(plus.size(0)-1, -1, -1)]
     idx = [i for i in range(plus.size(0))]
     idx = torch.LongTensor(idx)
     invert_plus = plus.cpu().index_select(0, idx)
@@ -83,22 +84,14 @@ for x, y in data_set[:10]:
     loss = loss_fn(output.unsqueeze(0), y.view(1))
     _, pred_ids = torch.max(output.data, 0) # TODO 1
     # size of attn.data is (batch, head, classes, secense)
-    # print((model.decoder.layers[0].src_attention.attn.data[:, :, 2, :]).long(), 555)
-    # print((model.decoder.layers[2].src_attention.attn.data[:, :, 2, :]).long(), 555)
-    # attn_data = model.decoder.layers[0].src_attention.attn.data[:, :, int(pred_ids), :].squeeze()
-    # attn_data = model.decoder.layers[0].src_attention.attn.data[:, 0, :, :].squeeze()
-    attn_map = model.decoder.layers[1].src_attention.attn.squeeze()
-    # attn_map = model.decoder.layers[1].src_attention.attn.squeeze()
+    attn_map = model.decoder.layers[seeing_layer].src_attention.attn.squeeze()
     attn_data = torch.mean(attn_map, dim=0)
     
-    model.decoder.layers[1].src_attention.attn.register_hook(save_grad('temp'))
-    # model.decoder.layers[1].src_attention.attn.register_hook(save_grad('temp'))
+    model.decoder.layers[seeing_layer].src_attention.attn.register_hook(save_grad('temp'))
     model.zero_grad()
     gradients = torch.full((output.size(0),), 0).to(device)
-    # gradients = torch.tensor([0., 0., 1., 0., 0., 0.]).to(device)
     gradients[pred_ids] = 1
     output.backward(gradients)
-    # grad_plan = (grads['temp'].squeeze()).clamp(min=0)
 
     #########################
     grad_plan = (grads['temp'].squeeze()).clamp(min=0)
@@ -118,64 +111,17 @@ for x, y in data_set[:10]:
     attn_minus = torch.mean(grad_plus, dim=0)
     ##########################
 
-    grad_attn = (grads['temp'].squeeze()).clamp(min=0)
-
-
-    # attn_data = torch.mean(grad_plus, dim=0)
-    # attn_plus = torch.mean(attn_map*grad_plus, dim=0)
-    
-    # grad_plus = (1 - grad_plan) * attn_map
-    # grad_flat = grad_plus.view(grad_plus.size(0), -1)
-    # grad_flat = grad_flat - torch.min(grad_flat, dim=-1, keepdim=True)[0]
-    # grad_flat = grad_flat / torch.max(grad_flat, dim=-1, keepdim=True)[0]
-    # grad_plus = grad_flat.view(grad_plus.size())
-
-    # attn_minus = torch.mean(attn_map*(1-grad_plus), dim=0)
-    # attn_minus = torch.mean(attn_map - grad_plus, dim=0)
-
-
-
-
-    # attn_data = torch.mean((F.softmax(grad_attn, dim=-1))*attn_map, dim=0)
-    # attn_plus = torch.mean((F.softmax(grad_attn, dim=-1))*attn_map, dim=0)
-    # # attn_data = torch.mean((1 - F.softmax(grad_attn, dim=-1))*attn_map, dim=0)
-    # attn_minus = torch.mean((1 - F.softmax(grad_attn, dim=-1))*attn_map, dim=0)
-    # # attn_data = torch.mean(F.softmax(grad_attn, dim=-1), dim=0)
-
-    # attn_data = torch.mean(grad_attn, dim=0)
-    # attn_minus = torch.mean(1-grad_attn, dim=0)
-    # print(attn_data)
-
-    # my_palette = bokeh.palettes.Category20c[20]
-    # attn_i = grad_attn[:, 1:, :].transpose(0, 1)
-    # for attn_j in attn_i:
-    #     f = figure()
-    #     for i, j in enumerate(attn_j):
-    #         # j = F.softmax(j, dim=-1)
-    #         f.line(range(len(j)), j.cpu().detach().numpy(), line_color=my_palette[i])
-    #     show(f)
-    
-    # attn_zero = torch.tensor([[0. for i in range(255)]]).transpose(0, 1)
-    # attn_data = reversed(attn_data.transpose(0, 1))
-    # dir_img, X, Y = creat_img(attn_data)
-    # dir_img, X, Y = creat_img2(attn_zero, attn_data)
-
-
     # for attention
     # dir_img, X, Y = creat_img(attn_data[1:])
 
     # for my_proposal
     dir_img, X, Y = creat_img2(attn_plus[1:], attn_minus[1:])
-    
+
     figure_list.append(figure(plot_width=640, plot_height=320, x_range=(0, X), y_range=(0+1, Y+1),
                               title="{},{},{},{}".format(x.to('cpu')[:5], int(y), int(pred_ids),
                               (output[1:] *10).round().to('cpu').int().detach().numpy())
                               ))
     figure_list[total].image_rgba(image=[dir_img], x=[0], y=[0+1], dw=[X], dh=[Y])
-    # figure_list.append(figure(plot_width=640, plot_height=200, x_range=(0, X), y_range=(Y+1, 0+1),
-    #                           title="{},{},{},{}".format(x.to('cpu')[:5], int(y), int(pred_ids), output[1:].to('cpu').int().detach().numpy())
-    #                           ))
-    # figure_list[total].image_rgba(image=[dir_img], x=[0], y=[Y+1], dw=[X], dh=[Y])
     figure_list[total].xgrid.minor_grid_line_color = 'navy'
     figure_list[total].xgrid.minor_grid_line_alpha = 0.1
     figure_list[total].xaxis.axis_label = '会話の長さ'
